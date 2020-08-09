@@ -13,6 +13,7 @@
 #include "Window.h"
 #include "Mesh.h"
 #include "Shader.h"
+#include "Camera.h"
 
 // OpenGL rotations use radians, using this allows for working in degrees and easy conversion
 const float toRadians = 3.14159265f / 180.0f;
@@ -23,6 +24,11 @@ Window mainWindow;
 // List of meshes and shaders
 std::vector<Mesh*> meshList;
 std::vector<Shader> shaderList;
+
+Camera camera;
+
+GLfloat deltaTime = 0.0f;
+GLfloat lastTime = 0.0f;
 
 // Location of Vertex Shader
 static const char* vShader = "Shaders/shader.vert";
@@ -91,17 +97,29 @@ int main()
 	CreateObjects();
 	CreateShaders();
 
+	// Initialise camera constructor
+	camera = Camera(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f), -90.0f, 0.0f, 5.0f, 0.001f);
+
 	// Uniform variables to be passed to vertex shader. Initialised to 0 by default to prevent weird stuff happening
-	GLuint uniformProjection = 0, uniformModel = 0;
+	GLuint uniformProjection = 0, uniformModel = 0, uniformView = 0;
 
 	// Create projection matrix. perspective(vertical FOV, Aspect Ratiom, Near clip plane, Far clip Plane)
-	glm::mat4 projection = glm::perspective(45.0f, mainWindow.getBufferWidth() /mainWindow.getBufferHeight(), 0.1f, 100.0f);
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), mainWindow.getBufferWidth() /mainWindow.getBufferHeight(), 0.1f, 100.0f);
 
 	// Loop until window closed
 	while (!mainWindow.getShouldClose())
 	{
+		GLfloat now = glfwGetTime();
+		deltaTime = now - lastTime;
+		lastTime = now;
+
 		// Get and handle user input events
 		glfwPollEvents();
+
+		// Check if keys are being pressed in main window to move camera
+		camera.keyControl(mainWindow.getsKeys(), deltaTime);
+
+		camera.mouseControl(mainWindow.getXChange(), mainWindow.getYChange());
 
 		// Clear window
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -112,9 +130,10 @@ int main()
 		// Applies the shader to an OpenGL shader program
 		shaderList[0].UseShader();
 
-		// Getters for uniform vars model and projection
+		// Getters for uniform vars model, projection and view
 		uniformModel = shaderList[0].GetModelLocation();
 		uniformProjection = shaderList[0].GetProjectionLocation();
+		uniformView = shaderList[0].GetViewLocation();
 
 		// Create a 4x4 identity matrix as a starting point for transforms
 		glm::mat4 model = glm::mat4(1.0f);
@@ -126,7 +145,8 @@ int main()
 		// Pass model and projection to uniform variable counterparts by pointer
 		glUniformMatrix4fv(uniformModel, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(uniformProjection, 1, GL_FALSE, glm::value_ptr(projection));
-		
+		glUniformMatrix4fv(uniformView, 1, GL_FALSE, glm::value_ptr(camera.calculateViewMatrix()));
+
 		// Render mesh to screen
 		meshList[0]->RenderMesh();
 

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The following project can read vertex and fragment GLSL shader code from a file and compile it using OpenGL. Meshes can also be defined by vertex and index data, and easily drawn to a window using OpenGL.
+The following project can read vertex and fragment GLSL shader code from a file and compile it using OpenGL. Meshes can also be defined by vertex and index data, and easily drawn to a window using OpenGL. The scene can be explored with a viewport camera.
 
 ![Alt Text](https://i.gyazo.com/51d7f8945ffbf3278d45fd6ef02d7624.png)
 
@@ -15,4 +15,4 @@ The following project can read vertex and fragment GLSL shader code from a file 
 
 ## Future Plans
 
-The intent is to experiment with 3D rendering, and implement basic features such as cameras, camera control, image/texture loading, texture mapping, lighting (direction, point and spot) using the Phong lighting model, model importing, shadow mapping and skyboxes.
+The intent is to experiment with 3D rendering, and implement basic features such as image/texture loading, texture mapping, lighting (direction, point and spot) using the Phong lighting model, model importing, shadow mapping and skyboxes.
